@@ -166,24 +166,5 @@ int main([[maybe_unused]] int argc, char* argv[])
 
     generate(model, sentence);
 
-    
-    // std::vector<float> outputs {};
-    // outputs.resize(sentence.size(), {});
-
-    // for(size_t i = 0; i < inputs.size(); ++i)
-    // {
-    //     std::cout << inputs[i] << std::endl;
-    //     std::vector<float> oneHot = oneHotEncode(inputs[i], vocab_size);
-    //     outputs[i] = model.forward(oneHot.data());
-    // }
-
-    // std::ifstream modelOutputsFile { getOutputFile(executablePath) };
-    // const std::vector<float> expected_y = load_csv::loadFile<float>(modelOutputsFile);
-    // for(size_t i = 100; i < 105; ++i)
-    // {
-    //     std::cout << expected_y[i] << " ";
-    //     std::cout << outputs[i] << std::endl;
-    // }
-
     return 0;
 }
