@@ -2,42 +2,29 @@
 #include "RTNeural/tests/functional/load_csv.hpp"
 #include <filesystem>
 #include <iostream>
+#include <random>
 
 
 namespace fs = std::filesystem;
 
 std::string getRootDir(fs::path path)
 {
-    while(path.filename() != "lstm_inference") {
-        // std::cout << path << std::endl;
-        path = path.parent_path();
-    }
+    path = path.parent_path();
     return path.string();
 }
 
 std::string getModelFile(fs::path path)
 {
     path = getRootDir(path);
-    path.append("models/generative_gru.json");
+    path.append("gru256_2.json");
+    // path.append("gru512.json");
+
+    // std::cout << path << std::endl;
 
     return path.string();
 }
 
-std::string getInputFile(fs::path path)
-{
-    path = getRootDir(path);
-    path.append("test_data/generative_gru_x.csv");
-    return path.string();
-}
-
-std::string getOutputFile(fs::path path)
-{
-    path = getRootDir(path);
-    path.append("test_data/generative_gru_y.csv");
-    return path.string();
-}
-
-constexpr int vocab_size = 27;
+constexpr int vocab_size = 28;
 constexpr int embed_size = 128;
 constexpr int hidden_size = 256;
 
@@ -46,7 +33,7 @@ const std::unordered_map<int, char> intToCharMap = {
     {6, 'f'}, {7, 'g'}, {8, 'h'}, {9, 'i'}, {10, 'j'}, {11, 'k'},
     {12, 'l'}, {13, 'm'}, {14, 'n'}, {15, 'o'}, {16, 'p'}, {17, 'q'},
     {18, 'r'}, {19, 's'}, {20, 't'}, {21, 'u'}, {22, 'v'}, {23, 'w'},
-    {24, 'x'}, {25, 'y'}, {26, 'z'}
+    {24, 'x'}, {25, 'y'}, {26, 'z'}, {27, '\n'}
 };
 
 // using ModelType = RTNeural::ModelT<float, vocab_size, embed_size,
@@ -88,28 +75,57 @@ std::vector<float> oneHotEncode(int value, int numClasses) {
     return oneHot;
 }
 
-float sample(float *logits) {
-    // for (size_t i = 0; i < vocab_size; ++i) {
-    //     std::cout << logits[i] << " ";
-    // }
-    // std::cout << std::endl;
+// float sample(float *logits, float temperature) {
+//     // for (size_t i = 0; i < vocab_size; ++i) {
+//     //     std::cout << logits[i] << " ";
+//     // }
+//     // std::cout << std::endl;
 
-    float max = -10000;
-    size_t argmax = 0;
+//     float max = -10000;
+//     size_t argmax = 0;
+//     for (size_t i = 0; i < vocab_size; ++i) {
+//         if (logits[i] > logits[argmax]) {
+//             argmax = i;
+//             max = logits[i];
+//         }
+//     }
+
+//     // std::cout << argmax << std::endl;
+
+//     return (float)argmax;
+// }
+
+float sample(float* logits, float temperature) {
+    // Apply softmax with temperature
+    std::vector<float> prob_distribution(vocab_size);
+    float sum_exp = 0.0f;
+
+    // First, compute the exponentials adjusted by temperature
     for (size_t i = 0; i < vocab_size; ++i) {
-        if (logits[i] > logits[argmax]) {
-            argmax = i;
-            max = logits[i];
-        }
+        prob_distribution[i] = std::exp(logits[i] / temperature);
+        sum_exp += prob_distribution[i];
     }
 
-    return (float)argmax;
+    // Normalize to get probabilities
+    for (size_t i = 0; i < vocab_size; ++i) {
+        prob_distribution[i] /= sum_exp;
+    }
+
+    // Sample from the probability distribution
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::discrete_distribution<> dist(prob_distribution.begin(), prob_distribution.end());
+
+    return static_cast<float>(dist(gen));
 }
+
 
 void print_char(float token) {
     int tokeni = (int)token;
     if (tokeni == 0) {
         std::cout << ' ';
+    } else if (tokeni == 27) {
+        std::cout << std::endl;    
     } else {
         std::cout << (char)(tokeni + 96);
     }
@@ -119,38 +135,51 @@ void print_char(float token) {
 void generate(ModelType model, std::vector<float> sentence) {
     float *output;
 
+    float temperature = 0.4;
+
+    float next_token = -10000;
+
     // std::cout << sentence.size() << std::endl;
 
     for(size_t i = 0; i < sentence.size(); ++i)
     {
         // std::cout << sentence[i] << std::endl;
+
+        print_char(sentence[i]);
+
         std::vector<float> oneHot = oneHotEncode(sentence[i], vocab_size);
         model.forward(oneHot.data());
         output = (float *)model.getOutputs();
-        float next_token = sample(output);
+        
+        // for (size_t j = 0; j < 28; ++j) {
+        //     // std::cout << model.get<0>().outs[j] << ' ';
+        //     std::cout << output[j] << ' ';
+        // }
+        // std::cout << std::endl;
 
-        print_char(sentence[i]);
+        next_token = sample(output, temperature);
     }
 
-    for(int i = 0; i < 12; ++i) {
+    sentence.push_back(next_token);
+    print_char(next_token);
+
+    for(int i = 0; i < 100; ++i) {
         std::vector<float> oneHot = oneHotEncode(sentence[sentence.size() - 1], vocab_size);
         model.forward(oneHot.data());
         output = (float *)model.getOutputs();
-        float next_token = sample(output);
+        float next_token = sample(output, temperature);
         sentence.push_back(next_token);
 
         print_char(next_token);
+
+        if (next_token == 27) {
+            break;
+        }
     }
 }
 
 int main([[maybe_unused]] int argc, char* argv[])
 {
-    std::cout << "Running \"torch gru\" example..." << std::endl;
-
-    // for (int i = 0; i < 27; ++i) {
-    //     print_char((float)i);
-    // }
-
     auto executablePath = fs::weakly_canonical(fs::path(argv[0]));
     auto modelFilePath = getModelFile(executablePath);
 
@@ -159,12 +188,25 @@ int main([[maybe_unused]] int argc, char* argv[])
 
     ModelType model;
     loadModel(jsonStream, model);
-    model.reset();
 
-    std::ifstream modelInputsFile { getInputFile(executablePath) };
-    std::vector<float> sentence = load_csv::loadFile<float>(modelInputsFile);
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::uniform_int_distribution<> dis(1, 23);
 
-    generate(model, sentence);
+    std::vector<int> values = {19, 3, 2, 9};
+    // std::vector<int> values = {2};
+
+    for (int i = 0; i < values.size(); ++i) {
+        model.reset();
+
+        // float randomValue = static_cast<float>(dis(gen));
+        float randomValue = static_cast<float>(values[i]);
+
+        std::vector<float> sentence = {randomValue};
+        // std::vector<float> sentence = {2};
+
+        generate(model, sentence);
+    }
 
     return 0;
 }
