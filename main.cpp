@@ -123,13 +123,12 @@ float sample(float* logits, float temperature) {
 void print_char(float token) {
     int tokeni = (int)token;
     if (tokeni == 0) {
-        std::cout << ' ';
+        std::cout << ' ' << std::flush;
     } else if (tokeni == 27) {
         std::cout << std::endl;    
     } else {
-        std::cout << (char)(tokeni + 96);
+        std::cout << (char)(tokeni + 96) << std::flush;
     }
-    // std::cout << token << std::endl;
 }
 
 void generate(ModelType model, std::vector<float> sentence) {
@@ -186,8 +185,10 @@ int main([[maybe_unused]] int argc, char* argv[])
     std::cout << "Loading model from path: " << modelFilePath << std::endl;
     std::ifstream jsonStream(modelFilePath, std::ifstream::binary);
 
-    ModelType model;
-    loadModel(jsonStream, model);
+    auto model = std::make_unique<ModelType>();
+    // ModelType model;
+    // auto model = RTNeural::json_parser::parseJson<float>(jsonStream);
+    loadModel(jsonStream, *model);
 
     std::random_device rd;
     std::mt19937 gen(rd());
@@ -197,7 +198,7 @@ int main([[maybe_unused]] int argc, char* argv[])
     // std::vector<int> values = {2};
 
     for (int i = 0; i < values.size(); ++i) {
-        model.reset();
+        model->reset();
 
         // float randomValue = static_cast<float>(dis(gen));
         float randomValue = static_cast<float>(values[i]);
@@ -205,7 +206,7 @@ int main([[maybe_unused]] int argc, char* argv[])
         std::vector<float> sentence = {randomValue};
         // std::vector<float> sentence = {2};
 
-        generate(model, sentence);
+        generate(*model, sentence);
     }
 
     return 0;
