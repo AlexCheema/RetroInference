@@ -14,13 +14,10 @@ std::string getRootDir(fs::path path)
     return path.string();
 }
 
-std::string getModelFile(fs::path path)
+std::string getModelFile(fs::path path, std::string modelName)
 {
     path = getRootDir(path);
-    path.append("gru256_2.json");
-    // path.append("gru512.json");
-
-    // std::cout << path << std::endl;
+    path.append(modelName);
 
     return path.string();
 }
@@ -156,10 +153,26 @@ void generate(ModelType model, std::vector<float> sentence) {
     }
 }
 
+std::vector<float> tokenize_sentence(std::string sentence) {
+    std::vector<float> output = std::vector<float>();
+
+    for (int i = 0; i < sentence.size(); ++i) {
+        if (sentence[i] == ' ')
+            output.push_back(0);
+        else if (sentence[i] == '\n')
+            output.push_back(28);
+        else
+            output.push_back((float)(sentence[i] - 96));
+    }
+
+    return output;
+}
+
 int main([[maybe_unused]] int argc, char* argv[])
 {
     auto executablePath = fs::weakly_canonical(fs::path(argv[0]));
-    auto modelFilePath = getModelFile(executablePath);
+    // auto modelFilePath = getModelFile(executablePath);
+    auto modelFilePath = getModelFile(executablePath, std::string("gru256_2.json"));
 
     std::cout << "Loading model from path: " << modelFilePath << std::endl;
     std::ifstream jsonStream(modelFilePath, std::ifstream::binary);
@@ -176,20 +189,11 @@ int main([[maybe_unused]] int argc, char* argv[])
     std::string input;
     std::getline(std::cin, input);
 
-    std::vector<int> values = {19, 3, 2, 9};
-    // std::vector<int> values = {2};
+    std::vector<float> sentence = tokenize_sentence(input);
 
-    for (int i = 0; i < values.size(); ++i) {
-        model->reset();
+    model->reset();
 
-        // float randomValue = static_cast<float>(dis(gen));
-        float randomValue = static_cast<float>(values[i]);
-
-        std::vector<float> sentence = {randomValue};
-        // std::vector<float> sentence = {2};
-
-        generate(*model, sentence);
-    }
+    generate(*model, sentence);
 
     return 0;
 }

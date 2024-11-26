@@ -1,11 +1,11 @@
 #include "RTNeural/RTNeural/RTNeural.h"
 #include "RTNeural/tests/functional/load_csv.hpp"
+#include "inference.h"
+
 #include <filesystem>
 #include <iostream>
 #include <random>
 
-
-namespace fs = std::filesystem;
 
 std::string getRootDir(fs::path path)
 {
@@ -13,16 +13,15 @@ std::string getRootDir(fs::path path)
     return path.string();
 }
 
-std::string getModelFile(fs::path path)
+std::string getModelFile(fs::path path, std::string modelName)
 {
     path = getRootDir(path);
-    path.append("gru256_2.json");
-    // path.append("gru512.json");
-
-    // std::cout << path << std::endl;
+    path.append(modelName);
 
     return path.string();
 }
+
+namespace fs = std::filesystem;
 
 constexpr int vocab_size = 28;
 constexpr int embed_size = 128;
@@ -35,9 +34,6 @@ const std::unordered_map<int, char> intToCharMap = {
     {18, 'r'}, {19, 's'}, {20, 't'}, {21, 'u'}, {22, 'v'}, {23, 'w'},
     {24, 'x'}, {25, 'y'}, {26, 'z'}, {27, '\n'}
 };
-
-// using ModelType = RTNeural::ModelT<float, vocab_size, embed_size,
-//     RTNeural::DenseT<float, vocab_size, embed_size>>;
 
 using ModelType = RTNeural::ModelT<float, vocab_size, vocab_size,
     RTNeural::DenseT<float, vocab_size, embed_size>,
@@ -74,26 +70,6 @@ std::vector<float> oneHotEncode(int value, int numClasses) {
     
     return oneHot;
 }
-
-// float sample(float *logits, float temperature) {
-//     // for (size_t i = 0; i < vocab_size; ++i) {
-//     //     std::cout << logits[i] << " ";
-//     // }
-//     // std::cout << std::endl;
-
-//     float max = -10000;
-//     size_t argmax = 0;
-//     for (size_t i = 0; i < vocab_size; ++i) {
-//         if (logits[i] > logits[argmax]) {
-//             argmax = i;
-//             max = logits[i];
-//         }
-//     }
-
-//     // std::cout << argmax << std::endl;
-
-//     return (float)argmax;
-// }
 
 float sample(float* logits, float temperature) {
     // Apply softmax with temperature
@@ -180,7 +156,7 @@ void generate(ModelType model, std::vector<float> sentence) {
 int main([[maybe_unused]] int argc, char* argv[])
 {
     auto executablePath = fs::weakly_canonical(fs::path(argv[0]));
-    auto modelFilePath = getModelFile(executablePath);
+    auto modelFilePath = getModelFile(executablePath, std::string("gru256_2.json"));
 
     std::cout << "Loading model from path: " << modelFilePath << std::endl;
     std::ifstream jsonStream(modelFilePath, std::ifstream::binary);
