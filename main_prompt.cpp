@@ -186,6 +186,8 @@ int main([[maybe_unused]] int argc, char* argv[])
     std::mt19937 gen(rd());
     std::uniform_int_distribution<> dis(1, 23);
 
+    std::cout << ">>> " << std::flush;
+
     std::string input;
     std::getline(std::cin, input);
 
