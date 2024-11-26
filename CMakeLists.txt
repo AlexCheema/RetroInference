@@ -21,13 +21,15 @@ if(ANDROID)
     # set(CMAKE_ANDROID_STL_TYPE "c++_static")
 endif()
 
-add_executable(program main.cpp)
+add_executable(program_generate main.cpp)
 add_executable(program_prompt main_prompt.cpp)
+
+# target_include_directories(
 
 set(RTNEURAL_STL ON CACHE BOOL "Use RTNeural with this backend" FORCE)
 add_subdirectory(RTNeural)
 
-target_link_libraries(program LINK_PUBLIC RTNeural)
+target_link_libraries(program_generate LINK_PUBLIC RTNeural)
 target_link_libraries(program_prompt LINK_PUBLIC RTNeural)
 
 message(STATUS "START: CMAKE_CXX_FLAGS: ${CMAKE_CXX_FLAGS}")
