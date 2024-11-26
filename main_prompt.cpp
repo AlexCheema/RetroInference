@@ -3,6 +3,7 @@
 #include <filesystem>
 #include <iostream>
 #include <random>
+#include <string>
 
 
 namespace fs = std::filesystem;
@@ -75,26 +76,6 @@ std::vector<float> oneHotEncode(int value, int numClasses) {
     return oneHot;
 }
 
-// float sample(float *logits, float temperature) {
-//     // for (size_t i = 0; i < vocab_size; ++i) {
-//     //     std::cout << logits[i] << " ";
-//     // }
-//     // std::cout << std::endl;
-
-//     float max = -10000;
-//     size_t argmax = 0;
-//     for (size_t i = 0; i < vocab_size; ++i) {
-//         if (logits[i] > logits[argmax]) {
-//             argmax = i;
-//             max = logits[i];
-//         }
-//     }
-
-//     // std::cout << argmax << std::endl;
-
-//     return (float)argmax;
-// }
-
 float sample(float* logits, float temperature) {
     // Apply softmax with temperature
     std::vector<float> prob_distribution(vocab_size);
@@ -134,11 +115,9 @@ void print_char(float token) {
 void generate(ModelType model, std::vector<float> sentence) {
     float *output;
 
-    float temperature = 0.8;
+    float temperature = 0.4;
 
     float next_token = -10000;
-
-    // std::cout << sentence.size() << std::endl;
 
     for(size_t i = 0; i < sentence.size(); ++i)
     {
@@ -194,7 +173,10 @@ int main([[maybe_unused]] int argc, char* argv[])
     std::mt19937 gen(rd());
     std::uniform_int_distribution<> dis(1, 23);
 
-    std::vector<int> values = {19, 3, 2, 5};
+    std::string input;
+    std::getline(std::cin, input);
+
+    std::vector<int> values = {19, 3, 2, 9};
     // std::vector<int> values = {2};
 
     for (int i = 0; i < values.size(); ++i) {

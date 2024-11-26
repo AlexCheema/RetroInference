@@ -3,6 +3,7 @@ project(GenerativeGRU VERSION 1.0 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_OSX_ARCHITECTURES "arm64")
 
 # Define where the NDK is located
 set(ANDROID_NDK_PATH "/Users/mbeton/Library/Android/sdk/ndk/28.0.12674087")
@@ -20,11 +21,14 @@ if(ANDROID)
     # set(CMAKE_ANDROID_STL_TYPE "c++_static")
 endif()
 
-add_executable(GenerativeGRU main.cpp)
+add_executable(program main.cpp)
+add_executable(program_prompt main_prompt.cpp)
 
 set(RTNEURAL_STL ON CACHE BOOL "Use RTNeural with this backend" FORCE)
 add_subdirectory(RTNeural)
-target_link_libraries(GenerativeGRU LINK_PUBLIC RTNeural)
+
+target_link_libraries(program LINK_PUBLIC RTNeural)
+target_link_libraries(program_prompt LINK_PUBLIC RTNeural)
 
 message(STATUS "START: CMAKE_CXX_FLAGS: ${CMAKE_CXX_FLAGS}")
 message(STATUS "CMAKE_C_COMPILER: ${CMAKE_C_COMPILER}")
