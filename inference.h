@@ -16,4 +16,4 @@ void loadModel(std::ifstream& jsonStream, ModelType& model);
 std::vector<float> oneHotEncode(int value, int numClasses);
 float sample(float* logits, float temperature);
 void print_char(float token);
-void generate(ModelType model, std::vector<float> sentence);
+void generate(ModelType& model, std::vector<float> sentence);

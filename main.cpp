@@ -18,8 +18,7 @@ int main([[maybe_unused]] int argc, char* argv[])
     std::cout << "Loading model from path: " << modelFilePath << std::endl;
     std::ifstream jsonStream(modelFilePath, std::ifstream::binary);
 
-    auto model = std::make_unique<ModelType>();
-    // ModelType model;
+    std::unique_ptr<ModelType> model = std::make_unique<ModelType>();
     // auto model = RTNeural::json_parser::parseJson<float>(jsonStream);
     loadModel(jsonStream, *model);
 

@@ -84,7 +84,7 @@ void print_char(float token) {
     }
 }
 
-void generate(ModelType model, std::vector<float> sentence) {
+void generate(ModelType& model, std::vector<float> sentence) {
     float *output;
 
     float temperature = 0.8;
