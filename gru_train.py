@@ -27,11 +27,14 @@ sentences_file = 'sentences.txt'
 allowed_chars = set(string.ascii_lowercase + ' \n')
 
 tt_split = 0.9
+word_count_threshold = 100
 
 vocab_size = 28  # a-z and space, \n chars
 embed_size = 256
 hidden_size = 512
 batch_size = 64
+
+epochs = 10
 
 
 ## Classes
@@ -92,7 +95,16 @@ class GRUTextGenerator(nn.Module):
 
 ## Dataset
 
-def compile_sentences(sentences_file):
+def print_info(sentences):
+    # Length of alphabet used
+    print('token set length: ', len(list(set(''.join(sentences)))))
+
+    ## Number of unique words
+    print('unique words: ', len(list(' '.join(sentences).split(' '))))
+    print('word vocabulary length: ', len(list(set(' '.join(sentences).split(' ')))))
+
+
+def compile_sentences(sentences_file, word_count_threshold=word_count_threshold):
     print('Importing sentences...')
 
     sentences = []
@@ -102,14 +114,6 @@ def compile_sentences(sentences_file):
     sentences = [re.sub('\W+', ' ', x.lower()).strip() for x in sentences]
 
     sentences = list(set(sentences))
-
-    def print_info(sentences):
-        # Length of alphabet used
-        print('token set length: ', len(list(set(''.join(sentences)))))
-
-        ## Number of unique words
-        print('unique words: ', len(list(' '.join(sentences).split(' '))))
-        print('word vocabulary length: ', len(list(set(' '.join(sentences).split(' ')))))
 
     map_dict = {x[0]:y for x,y in 
             pd.DataFrame(list(' '.join(sentences).split(' ')))\
@@ -121,7 +125,7 @@ def compile_sentences(sentences_file):
         good = True
 
         for word in sentence.split(' '):
-            if map_dict[word] < 10:
+            if map_dict[word] < word_count_threshold:
                 good = False
                 break
 
@@ -306,16 +310,13 @@ def train(
 
 
 def main():
-    
-
     sentences = compile_sentences(sentences_file)
-    sentences = sentences
 
     model = GRUTextGenerator(vocab_size, embed_size, hidden_size)
 
-    train_dataloaders, test_dataloaders = build_datasets(sentences[:10])
+    train_dataloaders, test_dataloaders = build_datasets(sentences)
 
-    train(model, train_dataloaders, test_dataloaders, vocab_size, device, epochs=100)
+    train(model, train_dataloaders, test_dataloaders, vocab_size, device, epochs=epochs)
 
 
 if __name__ == '__main__':
