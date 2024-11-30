@@ -21,8 +21,8 @@ if(ANDROID)
     # set(CMAKE_ANDROID_STL_TYPE "c++_static")
 endif()
 
-add_executable(program_generate main.cpp)
-add_executable(program_prompt main_prompt.cpp)
+add_executable(program_generate main.cpp inference.cpp)
+add_executable(program_prompt main_prompt.cpp inference.cpp)
 
 # target_include_directories(
 

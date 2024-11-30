@@ -7,20 +7,6 @@
 #include <random>
 
 
-std::string getRootDir(fs::path path)
-{
-    path = path.parent_path();
-    return path.string();
-}
-
-std::string getModelFile(fs::path path, std::string modelName)
-{
-    path = getRootDir(path);
-    path.append(modelName);
-
-    return path.string();
-}
-
 namespace fs = std::filesystem;
 
 constexpr int vocab_size = 28;
