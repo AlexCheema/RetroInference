@@ -1,10 +1,12 @@
 #include "RTNeural/RTNeural/RTNeural.h"
 #include "RTNeural/tests/functional/load_csv.hpp"
+
+#include "inference.h"
+
 #include <filesystem>
 #include <iostream>
 #include <random>
 
-namespace fs = std::filesystem;
 
 std::string getRootDir(fs::path path)
 {
