@@ -5,9 +5,9 @@ Lightweight mobile inference of generative language models using [RTNeural](http
 ## Usage Instructions
 
 ```
-git clone git@github.com:MattyAB/MobileInference.git
+git clone https://github.com/MattyAB/MobileInference/
 cd MobileInference
 git clone https://github.com/jatinchowdhury18/RTNeural/
 ./build.sh
-./program_generate
+./build/program_generate
 ```

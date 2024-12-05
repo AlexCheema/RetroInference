@@ -9,7 +9,7 @@
 
 
 std::string getRootDir(fs::path path) {
-    path = path.parent_path();
+    path = path.parent_path().parent_path();
     return path.string();
 }
 
