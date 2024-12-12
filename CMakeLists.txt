@@ -4,6 +4,13 @@ project(GenerativeGRU VERSION 1.0 LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+# Windows 95 targeting
+set(CMAKE_SYSTEM_NAME Windows)
+add_definitions(-D_WIN32_WINDOWS=0x0400 -D_WIN32_WINNT=0x0400)
+
+# Static linking
+set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -static")
+
 add_executable(program_generate main.cpp inference.cpp)
 add_executable(program_prompt main_prompt.cpp inference.cpp)
 
