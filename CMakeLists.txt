@@ -3,34 +3,21 @@ project(GenerativeGRU VERSION 1.0 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_OSX_ARCHITECTURES "arm64")
-
-# Define where the NDK is located
-set(ANDROID_NDK_PATH "/Users/mbeton/Library/Android/sdk/ndk/28.0.12674087")
-set(CMAKE_TOOLCHAIN_FILE "${ANDROID_NDK_PATH}/build/cmake/android.toolchain.cmake")
-set(ANDROID TRUE)
-
-if(ANDROID)
-    message(STATUS "Configuring for Android...")
-
-    set(ANDROID_ABI "armeabi-v7a")
-    set(CMAKE_ANDROID_ARCH_ABI "armeabi-v7a")
-    set(CMAKE_SYSTEM_VERSION 23)  # This should match your target API level
-
-    # Uncomment if you want a specific type of STL, but usually handled by the toolchain:
-    # set(CMAKE_ANDROID_STL_TYPE "c++_static")
-endif()
 
 add_executable(program_generate main.cpp inference.cpp)
 add_executable(program_prompt main_prompt.cpp inference.cpp)
-
-# target_include_directories(
 
 set(RTNEURAL_STL ON CACHE BOOL "Use RTNeural with this backend" FORCE)
 add_subdirectory(RTNeural)
 
 target_link_libraries(program_generate LINK_PUBLIC RTNeural)
 target_link_libraries(program_prompt LINK_PUBLIC RTNeural)
+
+if(MINGW)
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -O3")
+  
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unused-local-typedefs -Wno-deprecated-declarations")
+endif()
 
 message(STATUS "START: CMAKE_CXX_FLAGS: ${CMAKE_CXX_FLAGS}")
 message(STATUS "CMAKE_C_COMPILER: ${CMAKE_C_COMPILER}")
